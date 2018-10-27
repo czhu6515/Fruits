@@ -4,8 +4,14 @@ class Body extends React.Component {
     this.state = {
       fruits: []
     };
+
     this.handleFormSubmit = this.handleFormSubmit.bind(this)
     this.addNewFruit = this.addNewFruit.bind(this)
+    this.handleDelete = this.handleDelete.bind(this)
+    this.deleteFruit = this.deleteFruit.bind(this)
+    this.handleUpdate = this.handleUpdate.bind(this);
+    this.updateFruit = this.updateFruit.bind(this)
+
   }
 
   handleFormSubmit(name, description){
@@ -21,11 +27,51 @@ class Body extends React.Component {
     .then((fruit)=>{
       this.addNewFruit(fruit)
     })
-    
   }
+
+  handleDelete(id){
+    fetch(`http://localhost:3000/api/v1/fruits/${id}`, 
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => { 
+        this.deleteFruit(id)
+      })
+  }
+
+  deleteFruit(id){
+    newFruits = this.state.fruits.filter((fruit) => fruit.id !== id)
+    this.setState({
+      fruits: newFruits
+    })
+  }
+
   addNewFruit(fruit){
     this.setState({
-      fruits: this.state.fruits.concat(fruit)
+      fruits: this.state.fruits.unshift(fruit)
+    })
+  }
+
+  handleUpdate(fruit){
+    fetch(`http://localhost:3000/api/v1/fruits/${fruit.id}`, 
+    {
+      method: 'PUT',
+      body: JSON.stringify({fruit: fruit}),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => { 
+        this.updateFruit(fruit)
+      })
+  }
+
+  updateFruit(fruit){
+    let newFruits = this.state.fruits.filter((f) => f.id !== fruit.id)
+    newFruits.push(fruit)
+    this.setState({
+      fruits: newFruits
     })
   }
   
@@ -39,7 +85,11 @@ class Body extends React.Component {
     return(
       <div>
         <NewFruit handleFormSubmit={this.handleFormSubmit}/>
-        <AllFruits fruits={this.state.fruits}  />
+        <AllFruits 
+          fruits={this.state.fruits} 
+          handleDelete={this.handleDelete}
+          handleUpdate={this.handleUpdate}
+        />
       </div>
     )
   }
